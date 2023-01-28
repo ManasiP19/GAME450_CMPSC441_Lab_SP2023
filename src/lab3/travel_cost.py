@@ -8,6 +8,9 @@ In this lab, you will write a function that calculates the cost of a route betwe
 A terrain is generated for you 
 '''
 import numpy as np
+from pathfinding.core.diagonal_movement import DiagonalMovement
+from pathfinding.core.grid import Grid
+from pathfinding.finder.a_star import AStarFinder
 
 def get_route_cost(route_coordinate, game_map):
     """
@@ -39,7 +42,25 @@ def get_route_cost(route_coordinate, game_map):
     :return: a floating point number representing the cost of the route
     """
     # Build a path from start to end that looks like [(0, 0), (1, 1), (2, 2), (3, 3), (4, 4), (5, 4)]
-    pass 
+    
+    print(route_coordinate)
+    print(game_map)
+
+    grid = Grid(matrix=game_map)
+    grid = Grid(width=300, height=200, matrix=game_map)
+    print(grid.height, grid.width)
+    print('route_coordinate[0][0]', route_coordinate[0][0], 'route_coordinate[0][1]', route_coordinate[0][1])
+    print('route_coordinate[1][0]', route_coordinate[1][0], 'route_coordinate[1][1]', route_coordinate[1][1])
+    start = grid.node(0, 0)#route_coordinate[0][0], route_coordinate[0][1])
+    end = grid.node(5, 4)#route_coordinate[1][0], route_coordinate[1][1])
+
+    print('start, end', start, end)
+
+    finder = AStarFinder(diagonal_movement=DiagonalMovement.always)
+    path, runs = finder.find_path(start, end, grid)
+
+    # path = astar(game_map, route_coordinate[0][0], route_coordinate[0][1])
+
     return game_map[tuple(zip(*path))].sum()
 
 
@@ -47,9 +68,9 @@ def route_to_coordinates(city_locations, city_names, routes):
     """ get coordinates of each of the routes from cities and city_names"""
     route_coordinates = []
     for route in routes:
-        start = city_names.index(route[0])
-        end = city_names.index(route[1])
-        route_coordinates.append((city_locations[start], city_locations[end]))
+      start = city_names.index(route[0])
+      end = city_names.index(route[1])
+      route_coordinates.append((city_locations[start], city_locations[end]))
     return route_coordinates
 
 
