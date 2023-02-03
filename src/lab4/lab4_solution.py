@@ -19,7 +19,7 @@ so that it can beat these three opponent agents:
     Agent Mimic:  this agent picks a weapon at random in the first round, 
                   and then always does what you did the previous round.  
                   For example:  if you played 1,2,0,1,2,0,1,2,0,...  
-                   then this agent would play 0,1,2,0,1,2,0,1,2,...
+                  then this agent would play 0,1,2,0,1,2,0,1,2,...
 
 Discussions in lab:  You don't know ahead of time which opponent you will be facing, 
 so the first few rounds will be used to figure this out.   How?
@@ -45,7 +45,23 @@ class AiPlayer(Player):
         self.initial_weapon = random_weapon_select()
     
     def weapon_selecting_strategy(self):
-        pass
+        '''
+        - figure out which agent playing against and what strategy
+        - have access to opponent's previous move as well as model's choice for opponent's move
+        - play whatever beats opponent's last move : (op_move[-1]+1)%3
+        - single agent
+        '''
+        # if opponent hasn't made any moves yet opponent makes a random move
+        if len(self.opponent_choices) == 0:
+            self.opponent_choices.append(self.initial_weapon)
+        # if i have made more than 1 move
+        if len(self.my_choices) > 1:
+            # and if opponent has mimicked my previous move
+            if self.opponent_choices[-1] == self.my_choices[-2]:
+                # make the move that beats my previous move since that will be opponent's next move
+                return (self.my_choices[-1]+1)%3
+        # make a move that beats opponent's previous move
+        return (self.opponent_choices[-1]+1)%3
 
 
 if __name__ == '__main__':
