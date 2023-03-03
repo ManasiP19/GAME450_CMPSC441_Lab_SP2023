@@ -13,16 +13,14 @@ fulfilled. Clearly explain in comments which line of code and variables are used
 import matplotlib.pyplot as plt
 import pygad
 import numpy as np
-
 import sys
 from pathlib import Path
-
 sys.path.append(str((Path(__file__) / ".." / ".." / "..").resolve().absolute()))
-
 from src.lab5.landscape import elevation_to_rgba
+from src.lab5.landscape import get_elevation
 
 
-def game_fitness(cities, idx, elevation, size):
+def game_fitness(solution, idx, elevation, size):
     fitness = 0.0001  # Do not return a fitness of 0, it will mess up the algorithm.
     """
     Create your fitness function here to fulfill the following criteria:
@@ -30,6 +28,16 @@ def game_fitness(cities, idx, elevation, size):
     2. The cities should have a realistic distribution across the landscape
     3. The cities may also not be on top of mountains or on top of each other
     """
+    solution_coords = solution_to_cities(solution, size) # get the coordinates of all the locations in the solution
+    for coords in solution_coords:
+        if elevation[coords[0], coords[1]] > 0.3 and elevation[coords[0], coords[1]] < 0.8: # check if the elevation of this city is within the good range
+            fitness = fitness + 0.1 # increase the fitness by 0.1 if the elevation is good
+        else: # if elevation as bad
+            if (fitness - 0.1 > 0): # check if fitness becomes negative if decreased by 0.1
+                fitness = fitness - 0.1 # decrease by 0.1 if not becoming negative
+            else:
+                fitness = 0.0001 # set back to lowest value if becoming negative
+
     return fitness
 
 
@@ -115,14 +123,15 @@ if __name__ == "__main__":
     n_cities = 10
     elevation = []
     """ initialize elevation here from your previous code"""
+    elevation = get_elevation(size)
     # normalize landscape
     elevation = np.array(elevation)
     elevation = (elevation - elevation.min()) / (elevation.max() - elevation.min())
     landscape_pic = elevation_to_rgba(elevation)
 
     # setup fitness function and GA
-    fitness = lambda cities, idx: game_fitness(
-        cities, idx, elevation=elevation, size=size
+    fitness = lambda solution, idx: game_fitness(
+        solution, idx, elevation=elevation, size=size
     )
     fitness_function, ga_instance = setup_GA(fitness, n_cities, size)
 
