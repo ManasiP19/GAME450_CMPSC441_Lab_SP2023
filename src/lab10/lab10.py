@@ -34,7 +34,10 @@ print("Accuracy of model: {}\n".format(sklearn_model.score(x_test, y_test)))
 
 
 """ Improve the model by normalizing the input data. """
-normalized_x = preprocessing.normalize(x, axis=0) # normalize by feature (axis=0)
+#normalized_x = preprocessing.normalize(x, axis=0) # normalize by feature (row) => axis=0
+scaler = preprocessing.MinMaxScaler(feature_range=(0,1))
+normalized_x = scaler.fit_transform(x)
+print(normalized_x)
 
 # split normalized data
 x_train, x_test, y_train, y_test = train_test_split(
