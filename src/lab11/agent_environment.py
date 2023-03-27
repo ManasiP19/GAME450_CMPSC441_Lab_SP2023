@@ -39,7 +39,7 @@ def setup_window(width, height, caption):
     return window
 
 
-def displayCityNames(city_locations, city_names):
+def display_city_names(city_locations, city_names):
     for i, name in enumerate(city_names):
         text_surface = game_font.render(str(i) + " " + name, True, (0, 0, 150))
         screen.blit(text_surface, city_locations[i])
@@ -69,7 +69,7 @@ if __name__ == "__main__":
     start_city = 0
     end_city = 9
     sprite_path = "assets/lego.png"
-    sprite_speed = 1
+    sprite_speed = 0.5
 
     screen = setup_window(width, height, "Game World Gen Practice")
 
@@ -101,6 +101,8 @@ if __name__ == "__main__":
     """ Add a line below that will reset the player variable to 
     a new object of PyGameAIPlayer class."""
 
+    player = PyGameAIPlayer()
+
     state = State(
         current_city=start_city,
         destination_city=start_city,
@@ -111,7 +113,7 @@ if __name__ == "__main__":
     )
 
     while True:
-        action = player.selectAction(state)
+        action = player.select_action(state)
         if 0 <= int(chr(action)) <= 9:
             if int(chr(action)) != state.current_city and not state.travelling:
                 start = cities[state.current_city]
@@ -132,7 +134,7 @@ if __name__ == "__main__":
         for line in routes:
             pygame.draw.line(screen, (255, 0, 0), *line)
 
-        displayCityNames(cities, city_names)
+        display_city_names(cities, city_names)
         if state.travelling:
             state.travelling = player_sprite.move_sprite(destination, sprite_speed)
             state.encounter_event = random.randint(0, 1000) < 2

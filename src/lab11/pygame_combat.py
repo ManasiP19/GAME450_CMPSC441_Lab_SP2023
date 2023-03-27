@@ -16,7 +16,7 @@ class PyGameComputerCombatPlayer(CombatPlayer):
     def __init__(self, name):
         super().__init__(name)
 
-    def weapon_selecting_strategy(self):
+    def select_action(self, state):
         if 30 < self.health < 50:
             self.weapon = 2
         elif self.health < 30:
@@ -31,6 +31,7 @@ def run_pygame_combat(combat_surface, screen, player_sprite):
     player = PyGameHumanCombatPlayer("Legolas")
     """ Add a line below that will reset the player object
     to an instance of the PyGameAICombatPlayer class"""
+    player = PyGameAICombatPlayer("Legolas")
 
     opponent = PyGameComputerCombatPlayer("Computer")
     opponent_sprite = Sprite(
@@ -52,7 +53,7 @@ def run_pygame_combat(combat_surface, screen, player_sprite):
 
         states = list(reversed([(player.health, player.weapon) for player in players]))
         for current_player, state in zip(players, states):
-            current_player.selectAction(state)
+            current_player.select_action(state)
 
         currentGame.newRound()
         currentGame.takeTurn(player, opponent)
