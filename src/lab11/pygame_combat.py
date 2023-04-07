@@ -17,10 +17,15 @@ class PyGameComputerCombatPlayer(CombatPlayer):
     def __init__(self, name):
         super().__init__(name)
 
+<<<<<<< HEAD
     def select_action(self, state):
         if 30 < self.health < 50:
+=======
+    def weapon_selecting_strategy(self):
+        if 30 < self.health <= 50:
+>>>>>>> 02420b0ab485337704763d09b425a884e216686a
             self.weapon = 2
-        elif self.health < 30:
+        elif self.health <= 30:
             self.weapon = 1
         else:
             self.weapon = 0
@@ -31,24 +36,41 @@ def draw_combat_on_window(combat_surface, screen, player_sprite, opponent_sprite
     screen.blit(combat_surface, (0, 0))
     player_sprite.draw_sprite(screen)
     opponent_sprite.draw_sprite(screen)
+<<<<<<< HEAD
     text_surface = game_font.render(
             "Choose s-Sword a-Arrow f-Fire!", True, (0, 0, 150)
         )
     screen.blit(text_surface, (50, 50))
     pygame.display.update()
 
+=======
+    text_surface = game_font.render("Choose s-Sword a-Arrow f-Fire!", True, (0, 0, 150))
+    screen.blit(text_surface, (50, 50))
+    pygame.display.update()
+
+
+>>>>>>> 02420b0ab485337704763d09b425a884e216686a
 def run_turn(currentGame, player, opponent):
     players = [player, opponent]
     states = list(reversed([(player.health, player.weapon) for player in players]))
     for current_player, state in zip(players, states):
+<<<<<<< HEAD
         current_player.select_action(state)
+=======
+        current_player.selectAction(state)
+>>>>>>> 02420b0ab485337704763d09b425a884e216686a
 
     currentGame.newRound()
     currentGame.takeTurn(player, opponent)
     print("%s's health = %d" % (player.name, player.health))
     print("%s's health = %d" % (opponent.name, opponent.health))
+<<<<<<< HEAD
     reward = currentGame.checkWin(player, opponent) # capture reward
     return reward
+=======
+    reward = currentGame.checkWin(player, opponent)
+
+>>>>>>> 02420b0ab485337704763d09b425a884e216686a
 
 def run_pygame_combat(combat_surface, screen, player_sprite):
     currentGame = Combat()
@@ -65,4 +87,9 @@ def run_pygame_combat(combat_surface, screen, player_sprite):
     # Main Game Loop
     while not currentGame.gameOver:
         draw_combat_on_window(combat_surface, screen, player_sprite, opponent_sprite)
+<<<<<<< HEAD
         run_turn(currentGame, player, opponent)
+=======
+
+        run_turn(currentGame, player, opponent)
+>>>>>>> 02420b0ab485337704763d09b425a884e216686a
