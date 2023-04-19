@@ -39,7 +39,7 @@ class CombatPlayer(Player):
         points = 10
         self.health -= points
 
-    def weapon_selecting_strategy(self):
+    def select_action(self):
         choice = input("Choose your weapon s-Sword, a-Arrow or f-Fire:  ")
         choice = {"s": 1, "a": 2, "f": 3}[choice]
         self.weapon = choice - 1

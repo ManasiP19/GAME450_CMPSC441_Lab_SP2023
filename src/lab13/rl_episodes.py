@@ -19,6 +19,7 @@ from pathlib import Path
 sys.path.append(str((Path(__file__) / ".." / "..").resolve().absolute()))
 
 from lab11.pygame_combat import PyGameComputerCombatPlayer
+from lab11.turn_combat import ComputerCombatPlayer
 from lab11.turn_combat import CombatPlayer
 from lab12.episode import run_episode
 
@@ -73,8 +74,55 @@ def run_episodes(n_episodes):
         After all episodes have been run, calculate the average return for each state-action pair.
         Return the action values as a dictionary of dictionaries where the keys are states and 
             the values are dictionaries of actions and their values.
+
+        action_values = { (100, 100): {0: val1,
+                                       1: val2,
+                                       2: val3},
+                          (100, 90): {0: val1,
+                                      1: val2,
+                                      2: val3}
+                        }
     '''
 
+    player1 = PyGameRandomCombatPlayer("Player1")
+    player2 = PyGameRandomCombatPlayer("Player2")
+    episode_returns = []
+    returns = {}
+    returns_dict = {}
+    action_values = {}
+
+    for _ in range(n_episodes):
+        episode_returns = run_random_episode(player1, player2)
+        returns = get_history_returns(episode_returns)
+
+        for state, action_pair in returns.items():
+            if state not in returns_dict:
+                returns_dict[state] = {}
+            for i in action_pair:
+                returns_dict[state][i] = action_pair[i]
+
+    # print(returns_dict)
+    for state, action_pair in returns_dict.items():
+        zero_sum = 0
+        zero_ct = 0
+        one_sum = 0
+        one_ct = 0
+        two_sum = 0
+        two_ct = 0
+        if state not in action_values:
+            action_values[state] = {}
+        for key in action_pair:
+            if key == 0:
+                zero_sum += action_pair[key]
+                zero_ct += 1
+            elif key == 1:
+                one_sum += action_pair[key]
+                one_ct += 1
+            elif key == 2:
+                two_sum += action_pair[key]
+                two_ct += 1
+        action_values[state][key] = sum(i==key for i in returns_dict[state].keys()) / len(returns_dict[state])
+    
     return action_values
 
 
@@ -90,7 +138,7 @@ def test_policy(policy):
     total_reward = 0
     for _ in range(100):
         player1 = PyGamePolicyCombatPlayer(names[0], policy)
-        player2 = PyGameComputerCombatPlayer(names[1])
+        player2 = ComputerCombatPlayer(names[1])
         players = [player1, player2]
         total_reward += sum(
             [reward for _, _, reward in run_episode(*players)]
@@ -99,8 +147,8 @@ def test_policy(policy):
 
 
 if __name__ == "__main__":
-    action_values = run_episodes(10000)
-    print(action_values)
+    action_values = run_episodes(1000)
+    #print(action_values)
     optimal_policy = get_optimal_policy(action_values)
     print(optimal_policy)
     print(test_policy(optimal_policy))
