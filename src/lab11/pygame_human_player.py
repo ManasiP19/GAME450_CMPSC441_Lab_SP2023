@@ -4,7 +4,7 @@ from lab11.turn_combat import CombatPlayer
 
 class PyGameHumanPlayer:
     def __init__(self) -> None:
-        pass
+        self.money = 100
 
     def selectAction(self, state):
         for event in pygame.event.get():

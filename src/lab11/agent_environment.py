@@ -4,8 +4,9 @@ import random
 from sprite import Sprite
 from pygame_combat import run_pygame_combat
 from pygame_human_player import PyGameHumanPlayer
-from landscape import get_landscape, get_combat_bg
+from landscape import get_elevation, elevation_to_rgba, get_combat_bg
 from pygame_ai_player import PyGameAIPlayer
+from response_generator import generate_dialogue
 
 from pathlib import Path
 
@@ -19,10 +20,12 @@ game_font = pygame.font.SysFont("Comic Sans MS", 15)
 
 
 def get_landscape_surface(size):
-    landscape = get_landscape(size)
+    elevation = get_elevation(size)
+    landscape = elevation_to_rgba(elevation)
+    # landscape = get_landscape(size)
     print("Created a landscape of size", landscape.shape)
     pygame_surface = pygame.surfarray.make_surface(landscape[:, :, :3])
-    return pygame_surface
+    return elevation, pygame_surface
 
 
 def get_combat_surface(size):
@@ -44,6 +47,17 @@ def display_city_names(city_locations, city_names):
         text_surface = game_font.render(str(i) + " " + name, True, (0, 0, 150))
         screen.blit(text_surface, city_locations[i])
 
+
+def get_route_cost(cities, current_city, dest_city, elevation):
+    '''
+    :param cities: two cities to calculate cost for
+    :param elevation: elevations of the landscape
+    :return: cost of route based on elevation
+    '''
+    city_elevations = []
+    city_elevations.append(elevation[cities[current_city][0]][cities[current_city][1]])
+    city_elevations.append(elevation[cities[dest_city][0]][cities[dest_city][1]])
+    return (int)((city_elevations[1] - city_elevations[0]) * 200)
 
 class State:
     def __init__(
@@ -73,7 +87,7 @@ if __name__ == "__main__":
 
     screen = setup_window(width, height, "Game World Gen Practice")
 
-    landscape_surface = get_landscape_surface(size)
+    elevation, landscape_surface = get_landscape_surface(size)
     combat_surface = get_combat_surface(size)
     city_names = [
         "Morkomasto",
@@ -101,7 +115,7 @@ if __name__ == "__main__":
     """ Add a line below that will reset the player variable to 
     a new object of PyGameAIPlayer class."""
 
-    player = PyGameAIPlayer()
+    #player = PyGameAIPlayer()
 
     state = State(
         current_city=start_city,
@@ -112,18 +126,29 @@ if __name__ == "__main__":
         routes=routes,
     )
 
+    route_cost = 0
+    shouldContinue = False
     while True:
-        action = player.select_action(state)
+        action = player.selectAction(state)
         if 0 <= int(chr(action)) <= 9:
             if int(chr(action)) != state.current_city and not state.travelling:
-                start = cities[state.current_city]
-                state.destination_city = int(chr(action))
-                destination = cities[state.destination_city]
-                player_sprite.set_location(cities[state.current_city])
-                state.travelling = True
-                print(
-                    "Travelling from", state.current_city, "to", state.destination_city
-                )
+                for route in routes:
+                    if route[0] == cities[state.current_city] and route[1] == cities[int(chr(action))]:
+                        shouldContinue = True
+                        break
+                if shouldContinue == False:
+                    print("No route from the current city to the selected city")
+                else:
+                    start = cities[state.current_city]
+                    state.destination_city = int(chr(action))
+                    destination = cities[state.destination_city]
+                    player_sprite.set_location(cities[state.current_city])
+                    state.travelling = True
+                    print(
+                        "Travelling from", state.current_city, "to", state.destination_city
+                    )
+                    player.money -= get_route_cost(cities, state.current_city, state.destination_city, elevation)
+                    shouldContinue = False
 
         screen.fill(black)
         screen.blit(landscape_surface, (0, 0))
@@ -135,22 +160,34 @@ if __name__ == "__main__":
             pygame.draw.line(screen, (255, 0, 0), *line)
 
         display_city_names(cities, city_names)
+
         if state.travelling:
             state.travelling = player_sprite.move_sprite(destination, sprite_speed)
             state.encounter_event = random.randint(0, 1000) < 2
             if not state.travelling:
                 print('Arrived at', state.destination_city)
+                print('Money left', player.money)
 
         if not state.travelling:
             encounter_event = False
             state.current_city = state.destination_city
 
         if state.encounter_event:
-            run_pygame_combat(combat_surface, screen, player_sprite)
+            reward = run_pygame_combat(combat_surface, screen, player_sprite)
+            player.money += reward * 20
+            print('Money earned:', reward*20)
+            print('Money left:', player.money)
             state.encounter_event = False
         else:
             player_sprite.draw_sprite(screen)
         pygame.display.update()
-        if state.current_city == end_city:
+        if player.money < 0:
+            print('GAME OVER! You do not have any money left')
+            print(generate_dialogue("i lost"))
+            break
+        if state.current_city == end_city :
             print('You have reached the end of the game!')
+            print('You have', player.money, 'left.')
+            print('You Won!')
+            print(generate_dialogue("i won"))
             break

@@ -61,6 +61,7 @@ class ComputerPlayer(Player):
 
         return self.opponent_choices[-1]
 
+    @staticmethod
     def weapon_selecting_strategy(self):
         if self.agent == 0:
             return self.agent_single()

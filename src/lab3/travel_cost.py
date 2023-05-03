@@ -43,23 +43,13 @@ def get_route_cost(route_coordinate, game_map):
     """
     # Build a path from start to end that looks like [(0, 0), (1, 1), (2, 2), (3, 3), (4, 4), (5, 4)]
     
-    print(route_coordinate)
-    print(game_map)
-
     grid = Grid(matrix=game_map)
     grid = Grid(width=300, height=200, matrix=game_map)
-    print(grid.height, grid.width)
-    print('route_coordinate[0][0]', route_coordinate[0][0], 'route_coordinate[0][1]', route_coordinate[0][1])
-    print('route_coordinate[1][0]', route_coordinate[1][0], 'route_coordinate[1][1]', route_coordinate[1][1])
     start = grid.node(0, 0)#route_coordinate[0][0], route_coordinate[0][1])
     end = grid.node(5, 4)#route_coordinate[1][0], route_coordinate[1][1])
 
-    print('start, end', start, end)
-
     finder = AStarFinder(diagonal_movement=DiagonalMovement.always)
     path, runs = finder.find_path(start, end, grid)
-
-    # path = astar(game_map, route_coordinate[0][0], route_coordinate[0][1])
 
     return game_map[tuple(zip(*path))].sum()
 

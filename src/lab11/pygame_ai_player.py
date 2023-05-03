@@ -3,6 +3,8 @@ from lab11.turn_combat import CombatPlayer
 
 """ Create PyGameAIPlayer class here"""
 class PyGameAIPlayer:
+    def __init__(self):
+        self.money = 100
     def select_action(self, state):
         return ord(str(state.current_city+1))
 

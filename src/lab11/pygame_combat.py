@@ -1,10 +1,11 @@
 import pygame
 from pathlib import Path
 
-from lab11.sprite import Sprite
-from lab11.turn_combat import CombatPlayer, Combat
-from lab11.pygame_ai_player import PyGameAICombatPlayer
-from lab11.pygame_human_player import PyGameHumanCombatPlayer
+from sprite import Sprite
+from turn_combat import CombatPlayer, Combat
+from pygame_ai_player import PyGameAICombatPlayer
+from pygame_human_player import PyGameHumanCombatPlayer
+from lab4.rock_paper_scissor import ComputerPlayer
 
 
 AI_SPRITE_PATH = Path("assets/ai.png")
@@ -14,17 +15,25 @@ game_font = pygame.font.SysFont("Comic Sans MS", 15)
 
 
 class PyGameComputerCombatPlayer(CombatPlayer):
-    def __init__(self, name):
+    def __init__(self, name, opponent):
         super().__init__(name)
+        self.agent = 2
+        self.opponent = opponent
 
-    def weapon_selecting_strategy(self):
-        if 30 < self.health < 50:
-            self.weapon = 2
-        elif self.health <= 30:
-            self.weapon = 1
-        else:
-            self.weapon = 0
+    def selectAction(self, state):
+        if len(self.opponent.my_choices) <= 1:
+            return 0
+        self.weapon = self.opponent.my_choices[-2]
         return self.weapon
+    # def weapon_selecting_strategy(self):
+    #     return self.weapon_selecting_strategy()
+        # if 30 < self.health < 50:
+        #     self.weapon = 2
+        # elif self.health <= 30:
+        #     self.weapon = 1
+        # else:
+        #     self.weapon = 0
+        # return self.weapon
 
 
 def draw_combat_on_window(combat_surface, screen, player_sprite, opponent_sprite):
@@ -62,38 +71,57 @@ def run_turn(currentGame, player, opponent):
 
 def run_pygame_combat(combat_surface, screen, player_sprite):
     currentGame = Combat()
-    player = PyGameHumanCombatPlayer("Legolas")
+    player = PyGameHumanCombatPlayer("Oillill")
     """ Add a line below that will reset the player object
     to an instance of the PyGameAICombatPlayer class"""
-    player = PyGameAICombatPlayer("Legolas")
+    #player = PyGameAICombatPlayer("Legolas")
 
-    opponent = PyGameComputerCombatPlayer("Computer")
+    opponent = PyGameComputerCombatPlayer("Computer", player)
     opponent_sprite = Sprite(
         AI_SPRITE_PATH, (player_sprite.sprite_pos[0] - 100, player_sprite.sprite_pos[1])
     )
 
     # Main Game Loop
     while not currentGame.gameOver:
-        screen.blit(combat_surface, (0, 0))
-        player_sprite.draw_sprite(screen)
-        opponent_sprite.draw_sprite(screen)
-        text_surface = game_font.render(
-            "Choose s-Sword a-Arrow f-Fire!", True, (0, 0, 150)
-        )
-        screen.blit(text_surface, (50, 50))
-        pygame.display.update()
-
-        states = list(reversed([(player.health, player.weapon) for player in players]))
-        for current_player, state in zip(players, states):
-            current_player.selectAction(state)
-
-        currentGame.newRound()
-        currentGame.takeTurn(player, opponent)
-        print("%s's health = %d" % (player.name, player.health))
-        print("%s's health = %d" % (opponent.name, opponent.health))
-        currentGame.checkWin(player, opponent)
-
-    # Main Game Loop
-    while not currentGame.gameOver:
         draw_combat_on_window(combat_surface, screen, player_sprite, opponent_sprite)
-        run_turn(currentGame, player, opponent)
+        reward = run_turn(currentGame, player, opponent)
+    
+    return reward
+
+    # currentGame = Combat()
+    # player = PyGameHumanCombatPlayer("Legolas")
+    # """ Add a line below that will reset the player object
+    # to an instance of the PyGameAICombatPlayer class"""
+    # player = PyGameAICombatPlayer("Legolas")
+
+    # opponent = PyGameComputerCombatPlayer("Computer")
+    # opponent_sprite = Sprite(
+    #     AI_SPRITE_PATH, (player_sprite.sprite_pos[0] - 100, player_sprite.sprite_pos[1])
+    # )
+
+    # # Main Game Loop
+    # while not currentGame.gameOver:
+    #     screen.blit(combat_surface, (0, 0))
+    #     player_sprite.draw_sprite(screen)
+    #     opponent_sprite.draw_sprite(screen)
+    #     text_surface = game_font.render(
+    #         "Choose s-Sword a-Arrow f-Fire!", True, (0, 0, 150)
+    #     )
+    #     screen.blit(text_surface, (50, 50))
+    #     pygame.display.update()
+
+    #     players = [player1]
+    #     states = list(reversed([(player.health, player.weapon) for player in players]))
+    #     for current_player, state in zip(players, states):
+    #         current_player.selectAction(state)
+
+    #     currentGame.newRound()
+    #     currentGame.takeTurn(player, opponent)
+    #     print("%s's health = %d" % (player.name, player.health))
+    #     print("%s's health = %d" % (opponent.name, opponent.health))
+    #     currentGame.checkWin(player, opponent)
+
+    # # Main Game Loop
+    # while not currentGame.gameOver:
+    #     draw_combat_on_window(combat_surface, screen, player_sprite, opponent_sprite)
+    #     run_turn(currentGame, player, opponent)
